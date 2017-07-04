@@ -7,7 +7,7 @@
 
     USAGE:
 
-        brace_expand = require 'brace_expand'
+        brace_expand = require 'brace-expand'
 
         s1 = brace_expand.expand("{1!,a } {-2..08..5} {z..x}")
 

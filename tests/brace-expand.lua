@@ -1,7 +1,7 @@
--- Test brace_expand.lua (not a real test unit, just a regular script)
+-- Test brace-expand.lua (not a real test unit, just a regular script)
 
 
-brace_expand = require 'brace_expand'
+brace_expand = require 'brace-expand'
 
 local tests = {
     { "" ; "" },

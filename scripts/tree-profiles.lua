@@ -16,7 +16,7 @@
 
     USAGE:
 
-        Simply drop this script (along with brace_expand.lua, ideally) in your
+        Simply drop this script (along with brace-expand.lua, ideally) in your
         scripts configuration directory (usually ~/.config/mpv/scripts/), and
         define some profiles in your main mpv configuration file (mpv.conf) as
         illustrated in the EXAMPLE section below.
@@ -29,7 +29,7 @@
         luaposix is also required at the moment.  (Therefore this script won't
         work on Windows, at least for now.)
 
-        brace_expand.lua (optional, from the same repository as this script)
+        brace-expand.lua (optional, from the same repository as this script)
         will enable the use of Bash-style brace expansions.
 
 
@@ -126,7 +126,7 @@
         # or:
         profile-desc="Gochuumon wa Usagi Desu ka[?]"
 
-        # Bash-style brace expansion is also supported (if brace_expand.lua
+        # Bash-style brace expansion is also supported (if brace-expand.lua
         # was installed alongside this script):
         #
         [anime/fma-s1-ep07-16]
@@ -246,10 +246,10 @@ local function prequire(m)
     if not ok then return nil, err end
     return err
 end
--- Don't fail if brace_expand.lua wasn't installed alongside us
-local brace_expand = prequire 'brace_expand'
+-- Don't fail if brace-expand.lua wasn't installed alongside us
+local brace_expand = prequire 'brace-expand'
 if not brace_expand then
-    msg.warn("brace_expand.lua not found -- brace expansion disabled")
+    msg.warn("brace-expand.lua not found -- brace expansion disabled")
     brace_expand = { expand = function(x) return {x} end }
 end
 
