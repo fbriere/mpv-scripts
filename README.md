@@ -4,7 +4,7 @@ Various mpv Lua scripts:
 
   Automatically apply profiles to certain directories or files.
 
-* **[audio-keys](scripts/audio-keys.lua)**
+* **[audio-file-keys](scripts/audio-file-keys.lua)**
 
   Automatically apply key bindings when playing audio files.
 
