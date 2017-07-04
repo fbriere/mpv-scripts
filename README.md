@@ -4,6 +4,10 @@ Various mpv Lua scripts:
 
   Automatically apply profiles to certain directories or files.
 
+* **[audio-keys](scripts/audio-keys.lua)**
+
+  Automatically apply key bindings when playing audio files.
+
 * **[brace-expand](scripts/brace-expand.lua)**
 
   Perform Bash-style brace expansion on a string.
