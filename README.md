@@ -1,5 +1,8 @@
 Various mpv Lua scripts:
 
+(These were initially written to "scratch my own itch", but I hope they can be
+useful to other people as well.  Feedback is most welcome!)
+
 * **tree-profiles**
 ([documentation](doc/tree-profiles.md))
 ([source](scripts/tree-profiles.lua))
