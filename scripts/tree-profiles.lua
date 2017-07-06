@@ -16,26 +16,26 @@
 
     USAGE:
 
-        Simply drop this script (along with brace-expand.lua, ideally) in your
-        scripts configuration directory (usually ~/.config/mpv/scripts/), and
-        define some profiles in your main mpv configuration file (mpv.conf) as
-        illustrated in the EXAMPLE section below.
+    Simply drop this script (along with brace-expand.lua, ideally) in your
+    scripts configuration directory (usually ~/.config/mpv/scripts/), and
+    define some profiles in your main mpv configuration file (mpv.conf) as
+    illustrated in the EXAMPLE section below.
 
 
     REQUIREMENTS:
 
-        This script requires mpv version 0.21.0 or later.
+    This script requires mpv version 0.21.0 or later.
 
-        luaposix is also required at the moment.  (Therefore this script won't
-        work on Windows, at least for now.)
+    luaposix is also required at the moment.  (Therefore this script won't
+    work on Windows, at least for now.)
 
-        brace-expand.lua (optional, from the same repository as this script)
-        will enable the use of Bash-style brace expansions.
+    brace-expand.lua (optional, from the same repository as this script)
+    will enable the use of Bash-style brace expansions.
 
 
     EXAMPLE:
 
-        Suppose your media files are arranged thusly:
+    Suppose your media files are arranged thusly:
 
         /media/
             anime/
@@ -52,7 +52,7 @@
             documentaries/
                 ...
 
-        Your mpv.conf could contain the following:
+    Your mpv.conf could contain the following:
 
         #
         # Profiles with a description starting with "tree:" will be
@@ -139,10 +139,10 @@
 
     SUB-PATHS FEATURE:
 
-        This script can also automatically add a "sub-paths" entry referring
-        to a directory structure mirroring that of the media files.
+    This script can also automatically add a "sub-paths" entry referring
+    to a directory structure mirroring that of the media files.
 
-        In clearer words, suppose your external subtitles are arranged thusly:
+    In clearer words, suppose your external subtitles are arranged thusly:
 
         /nas/
             subtitles/
@@ -151,70 +151,70 @@
                         Fullmetal Alchemist S01E01.ass
                         ...
 
-        After setting the "sub-paths-dir" script option to "/nas/subtitles",
-        the appropriate directory will automatically be appended to the
-        "sub-paths" option for every file under /media/anime.
+    After setting the "sub-paths-dir" script option to "/nas/subtitles",
+    the appropriate directory will automatically be appended to the
+    "sub-paths" option for every file under /media/anime.
 
-        You can set this option globally, by adding it to
-        ~/.config/mpv/lua-settings/tree_profiles.conf:
+    You can set this option globally, by adding it to
+    ~/.config/mpv/lua-settings/tree_profiles.conf:
 
-            sub-paths-dir=/nas/subtitles
+        sub-paths-dir=/nas/subtitles
 
-        You can also set it on the command-line (or in regular configuration
-        files) with the "script-opts" option:
+    You can also set it on the command-line (or in regular configuration
+    files) with the "script-opts" option:
 
-            --script-opts=tree_profiles-sub-paths-dir=/nas/subtitles
+        --script-opts=tree_profiles-sub-paths-dir=/nas/subtitles
 
 
     ADDITIONAL FEATURES:
 
-        Options set in a profile applied by this script will only take effect
-        on individual files, and will be restored to their previous value
-        afterwards.
+    Options set in a profile applied by this script will only take effect
+    on individual files, and will be restored to their previous value
+    afterwards.
 
-        This script will not apply any profiles in the presence of a
-        file-specific or directory-specific configuration file.  You can
-        therefore disable/override it for specific files or directories by
-        creating a (possibly empty) "<file>.conf" or "<dir>/mpv.conf" file.
-        (This configuration file could then pull in the original profile if
-        desired.)
+    This script will not apply any profiles in the presence of a
+    file-specific or directory-specific configuration file.  You can
+    therefore disable/override it for specific files or directories by
+    creating a (possibly empty) "<file>.conf" or "<dir>/mpv.conf" file.
+    (This configuration file could then pull in the original profile if
+    desired.)
 
 
     NOTES:
 
-        This script will output some additional information on higher
-        verbosity levels ("-v").  To increase the verbosity for this script
-        only, use "--msg-level=tree_profiles=v" (or "=debug" for more output).
+    This script will output some additional information on higher
+    verbosity levels ("-v").  To increase the verbosity for this script
+    only, use "--msg-level=tree_profiles=v" (or "=debug" for more output).
 
-        The aforementioned override does not take into account "<file>.conf"
-        files in ~/.config/mpv/ at the moment.
+    The aforementioned override does not take into account "<file>.conf"
+    files in ~/.config/mpv/ at the moment.
 
-        The "tree:" argument should really be an absolute path (although this
-        is not mandated for now).  Otherwise, it will be relative to the
-        current directory, which could get rather confusing.
+    The "tree:" argument should really be an absolute path (although this
+    is not mandated for now).  Otherwise, it will be relative to the
+    current directory, which could get rather confusing.
 
-        Unfortunately, "~" prefixes are currently *not* supported.  (This may
-        change in the future.)
+    Unfortunately, "~" prefixes are currently *not* supported.  (This may
+    change in the future.)
 
-        Keep in mind that the "tree:" argument is a plain directory name, not
-        a pattern, and therefore does not support wildcards.
+    Keep in mind that the "tree:" argument is a plain directory name, not
+    a pattern, and therefore does not support wildcards.
 
-        I have yet to determine how this script should behave in the presence
-        of symbolic links.  At the moment, symlinks are fully resolved before
-        comparing paths.  This may change in the future.
+    I have yet to determine how this script should behave in the presence
+    of symbolic links.  At the moment, symlinks are fully resolved before
+    comparing paths.  This may change in the future.
 
 
     AUTHOR:
 
-        Frédéric Brière <fbriere@fbriere.net>
+    Frédéric Brière <fbriere@fbriere.net>
 
-        Licensed under the GNU General Public License, version 2 or later.
+    Licensed under the GNU General Public License, version 2 or later.
 
 
     THANKS:
 
-        Thanks to V. Lang (wm4) for auto-profiles.lua, which was tremendously
-        helpful as a starting point (https://github.com/wm4/mpv-scripts).
+    Thanks to V. Lang (wm4) for auto-profiles.lua, which was tremendously
+    helpful as a starting point (https://github.com/wm4/mpv-scripts).
 
 --]]
 

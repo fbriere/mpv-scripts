@@ -25,29 +25,29 @@
 
     NOTES:
 
-        Special characters ('{', ',', '.', '}') can be quoted by preceding
-        then with a backslash.  That backslash is currently left in place and
-        *not* removed from the results.  (This may change in the future.)
+    Special characters ('{', ',', '.', '}') can be quoted by preceding
+    then with a backslash.  That backslash is currently left in place and
+    *not* removed from the results.  (This may change in the future.)
 
-        Only the characters listed above have any special meaning; in
-        particular, spaces and quotes are treated like any other character.
-        (The sequence '${' is not treated differently either.)
+    Only the characters listed above have any special meaning; in
+    particular, spaces and quotes are treated like any other character.
+    (The sequence '${' is not treated differently either.)
 
-        Otherwise, this module tries to mimic Bash's behavior as closely as
-        possible.  (If I missed something, please let me know!)
+    Otherwise, this module tries to mimic Bash's behavior as closely as
+    possible.  (If I missed something, please let me know!)
 
 
     AUTHOR:
 
-        Frédéric Brière <fbriere@fbriere.net>
+    Frédéric Brière <fbriere@fbriere.net>
 
-        Licensed under the GNU General Public License, version 2 or later.
+    Licensed under the GNU General Public License, version 2 or later.
 
 
     THANKS:
 
-        Thanks to Stanis Trendelenburg for braceexpand.py, which was tremendously
-        helpful as a starting point (https://github.com/trendels/braceexpand).
+    Thanks to Stanis Trendelenburg for braceexpand.py, which was tremendously
+    helpful as a starting point (https://github.com/trendels/braceexpand).
 
 --]]
 
