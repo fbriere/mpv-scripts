@@ -24,12 +24,12 @@
 
     REQUIREMENTS:
 
-    This script requires mpv version 0.21.0 or later.
+    - This script requires mpv version 0.21.0 or later.
 
-    luaposix is also required at the moment.  (Therefore this script won't
+    - luaposix is also required at the moment.  (Therefore this script won't
     work on Windows, at least for now.)
 
-    brace-expand.lua (optional, from the same repository as this script)
+    - brace-expand.lua (optional, from the same repository as this script)
     will enable the use of Bash-style brace expansions.
 
 
@@ -213,7 +213,7 @@
 
     THANKS:
 
-    Thanks to V. Lang (wm4) for auto-profiles.lua, which was tremendously
+    Thanks to V. Lang (@wm4) for auto-profiles.lua, which was tremendously
     helpful as a starting point (https://github.com/wm4/mpv-scripts).
 
 --]]
