@@ -4,14 +4,14 @@ Automatically apply profiles to certain directories or files.
 
 This mpv Lua script makes it easy to automatically apply a profile to
 a given directory, or to specific files within that directory, without
-the need to enable the `use-filedir-conf` option and scatter *.conf* files
+the need to enable `use-filedir-conf` and scatter *.conf* files
 everywhere.
 
 For a more detailed description of what this does, please refer to the
 [Example](#example) section below.
 
 (This script was initially written to "scratch my own itch", but I hope it
-can be useful to other people as well.  Feedback is gladly welcome!)
+can be useful to other people as well.  Feedback is most welcome!)
 
 
 ## USAGE
@@ -142,7 +142,7 @@ Your *mpv.conf* could contain the following:
 This script can also automatically add a `sub-paths` entry referring
 to a directory structure mirroring that of the media files.
 
-In clearer words, suppose your external subtitles are arranged thusly:
+In other words, suppose your external subtitles are arranged thusly:
 
     /nas/
         subtitles/
