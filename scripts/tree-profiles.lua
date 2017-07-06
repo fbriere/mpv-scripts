@@ -4,7 +4,7 @@
     
     This mpv Lua script makes it easy to automatically apply a profile to
     a given directory, or to specific files within that directory, without
-    the need to enable the `use-filedir-conf` option and scatter .conf files
+    the need to enable the `use-filedir-conf` option and scatter *.conf* files
     everywhere.
 
     For a more detailed description of what this does, please refer to the
@@ -17,8 +17,8 @@
     USAGE:
 
     Simply drop this script (along with brace-expand.lua, ideally) in your
-    scripts configuration directory (usually ~/.config/mpv/scripts/), and
-    define some profiles in your main mpv configuration file (mpv.conf) as
+    scripts configuration directory (usually *~/.config/mpv/scripts/*), and
+    define some profiles in your main mpv configuration file (*mpv.conf*) as
     illustrated in the EXAMPLE section below.
 
 
@@ -52,7 +52,7 @@
             documentaries/
                 ...
 
-    Your mpv.conf could contain the following:
+    Your *mpv.conf* could contain the following:
 
         #
         # Profiles with a description starting with "tree:" will be
@@ -153,10 +153,10 @@
 
     After setting the `sub-paths-dir` script option to `/nas/subtitles`,
     the appropriate directory will automatically be appended to the
-    `sub-paths` option for every file under /media/anime.
+    `sub-paths` option for every file under */media/anime*.
 
     You can set this option globally, by adding it to
-    ~/.config/mpv/lua-settings/tree_profiles.conf:
+    *~/.config/mpv/lua-settings/tree_profiles.conf*:
 
         sub-paths-dir=/nas/subtitles
 
@@ -175,7 +175,7 @@
     This script will not apply any profiles in the presence of a
     file-specific or directory-specific configuration file.  You can
     therefore disable/override it for specific files or directories by
-    creating a (possibly empty) "<file>.conf" or "<dir>/mpv.conf" file.
+    creating a (possibly empty) *<file>.conf* or *<dir>/mpv.conf* file.
     (This configuration file could then pull in the original profile if
     desired.)
 
@@ -186,8 +186,8 @@
     verbosity levels (`-v`).  To increase the verbosity for this script
     only, use `--msg-level=tree_profiles=v` (or `=debug` for more output).
 
-    The aforementioned override does not take into account "<file>.conf"
-    files in ~/.config/mpv/ at the moment.
+    The aforementioned override does not take into account *<file>.conf*
+    files in *~/.config/mpv/* at the moment.
 
     The `tree:` argument should really be an absolute path (although this
     is not mandated for now).  Otherwise, it will be relative to the
