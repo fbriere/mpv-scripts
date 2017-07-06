@@ -13,8 +13,8 @@ Unfortunately, since key bindings are applied globally, this also affects
 the playing of video files, where those other keys may be used more
 frequently, making their remapping somewhat undesirable.
 
-Wouldn't it be nice to be able to swap those keys only when playing audio
-files?  This is what this script makes possible.
+Wouldn't it be nice to be able to define a different set of key bindings
+for audio files?  This is the purpose of this script.
 
 
 ## USAGE
@@ -26,8 +26,8 @@ Simply add some key bindings to the `audio-file` input session in
     PGUP  {audio-file} keypress Shift+PGUP
     PGDWN {audio-file} keypress Shift+PGDWN
 
-You can override the name of the input session used by this script by
-setting it in *~/.config/mpv/lua-settings/audio_file_keys.conf*:
+You can define a different name for the input session used by this script
+by setting it in *~/.config/mpv/lua-settings/audio_file_keys.conf*:
 
     section=some-other-name
 
