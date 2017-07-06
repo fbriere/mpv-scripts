@@ -1,14 +1,20 @@
 Various mpv Lua scripts:
 
-* **[tree-profiles](scripts/tree-profiles.lua)**
+* **tree-profiles**
+([documentation](doc/tree-profiles.md))
+([source](scripts/tree-profiles.lua))
 
   Automatically apply profiles to certain directories or files.
 
-* **[audio-file-keys](scripts/audio-file-keys.lua)**
+* **audio-file-keys**
+([documentation](doc/audio-file-keys.md))
+([source](scripts/audio-file-keys.lua))
 
   Automatically apply key bindings when playing audio files.
 
-* **[brace-expand](scripts/brace-expand.lua)**
+* **brace-expand**
+([documentation](doc/brace-expand.md))
+([source](scripts/brace-expand.lua))
 
   Perform Bash-style brace expansion on a string.
 
