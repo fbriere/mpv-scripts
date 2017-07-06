@@ -25,13 +25,13 @@
 
     NOTES:
 
-    Special characters ('{', ',', '.', '}') can be quoted by preceding
+    Special characters (`{` `,` `.` `}`) can be quoted by preceding
     then with a backslash.  That backslash is currently left in place and
     *not* removed from the results.  (This may change in the future.)
 
     Only the characters listed above have any special meaning; in
     particular, spaces and quotes are treated like any other character.
-    (The sequence '${' is not treated differently either.)
+    (The sequence `${` is not treated differently either.)
 
     Otherwise, this module tries to mimic Bash's behavior as closely as
     possible.  (If I missed something, please let me know!)

@@ -4,11 +4,11 @@
 
     When playing audio files in a terminal, some key combinations may be
     intercepted by the terminal and therefore made unavailable to mpv.  For
-    example, Shift + Page Up/Down (seek forward/backward 10 min by default)
+    example, `Shift` + `Page Up/Down` (seek forward/backward 10 min by default)
     usually activates scrollback in most terminals.
 
     A simple solution to this issue involves swapping those keys with others
-    (usually Page Up/Down, since audio files seldom include chapters).
+    (usually `Page Up/Down`, since audio files seldom include chapters).
     Unfortunately, since key bindings are applied globally, this also affects
     the playing of video files, where those other keys may be used more
     frequently, making their remapping somewhat undesirable.
@@ -19,7 +19,7 @@
 
     USAGE:
 
-    Simply add some key bindings to the "audio-file" input session in
+    Simply add some key bindings to the `audio-file` input session in
     ~/.config/mpv/input.conf, such as:
 
         # Have Page Up/Down emulate Shift + Page Up/Down
@@ -42,11 +42,11 @@
     Technically, the trigger for this script is not directly based on the
     contents of the file being played, but rather on the presence or
     absence of a window.  Therefore, an audio file with image attachments
-    will be considered as being a video file (unless audio-display=no).
+    will be considered as being a video file (unless `audio-display=no`).
 
     This also means that this script can be forcibly disabled for all
-    files with --force-window, or forcibly enabled with --no-video.
-    (Note that setting vo=null will not have any effect, however.)
+    files with `--force-window`, or forcibly enabled with `--no-video`.
+    (Note that setting `vo=null` will not have any effect, however.)
 
 
     AUTHOR:

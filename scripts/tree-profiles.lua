@@ -4,7 +4,7 @@
     
     This mpv Lua script makes it easy to automatically apply a profile to
     a given directory, or to specific files within that directory, without
-    the need to enable the use-filedir-conf option and scatter .conf files
+    the need to enable the `use-filedir-conf` option and scatter .conf files
     everywhere.
 
     For a more detailed description of what this does, please refer to the
@@ -139,7 +139,7 @@
 
     SUB-PATHS FEATURE:
 
-    This script can also automatically add a "sub-paths" entry referring
+    This script can also automatically add a `sub-paths` entry referring
     to a directory structure mirroring that of the media files.
 
     In clearer words, suppose your external subtitles are arranged thusly:
@@ -151,9 +151,9 @@
                         Fullmetal Alchemist S01E01.ass
                         ...
 
-    After setting the "sub-paths-dir" script option to "/nas/subtitles",
+    After setting the `sub-paths-dir` script option to `/nas/subtitles`,
     the appropriate directory will automatically be appended to the
-    "sub-paths" option for every file under /media/anime.
+    `sub-paths` option for every file under /media/anime.
 
     You can set this option globally, by adding it to
     ~/.config/mpv/lua-settings/tree_profiles.conf:
@@ -161,7 +161,7 @@
         sub-paths-dir=/nas/subtitles
 
     You can also set it on the command-line (or in regular configuration
-    files) with the "script-opts" option:
+    files) with the `script-opts` option:
 
         --script-opts=tree_profiles-sub-paths-dir=/nas/subtitles
 
@@ -183,20 +183,20 @@
     NOTES:
 
     This script will output some additional information on higher
-    verbosity levels ("-v").  To increase the verbosity for this script
-    only, use "--msg-level=tree_profiles=v" (or "=debug" for more output).
+    verbosity levels (`-v`).  To increase the verbosity for this script
+    only, use `--msg-level=tree_profiles=v` (or `=debug` for more output).
 
     The aforementioned override does not take into account "<file>.conf"
     files in ~/.config/mpv/ at the moment.
 
-    The "tree:" argument should really be an absolute path (although this
+    The `tree:` argument should really be an absolute path (although this
     is not mandated for now).  Otherwise, it will be relative to the
     current directory, which could get rather confusing.
 
-    Unfortunately, "~" prefixes are currently *not* supported.  (This may
+    Unfortunately, `~` prefixes are currently *not* supported.  (This may
     change in the future.)
 
-    Keep in mind that the "tree:" argument is a plain directory name, not
+    Keep in mind that the `tree:` argument is a plain directory name, not
     a pattern, and therefore does not support wildcards.
 
     I have yet to determine how this script should behave in the presence
