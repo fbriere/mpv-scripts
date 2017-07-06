@@ -175,7 +175,7 @@
     This script will not apply any profiles in the presence of a
     file-specific or directory-specific configuration file.  You can
     therefore disable/override it for specific files or directories by
-    creating a (possibly empty) *<file>.conf* or *<dir>/mpv.conf* file.
+    creating a (possibly empty) *FILE.conf* or *DIR/mpv.conf* file.
     (This configuration file could then pull in the original profile if
     desired.)
 
@@ -186,7 +186,7 @@
     verbosity levels (`-v`).  To increase the verbosity for this script
     only, use `--msg-level=tree_profiles=v` (or `=debug` for more output).
 
-    The aforementioned override does not take into account *<file>.conf*
+    The aforementioned override does not take into account *.conf*
     files in *~/.config/mpv/* at the moment.
 
     The `tree:` argument should really be an absolute path (although this
@@ -206,7 +206,7 @@
 
     AUTHOR:
 
-    Frédéric Brière <fbriere@fbriere.net>
+    Frédéric Brière (fbriere@fbriere.net)
 
     Licensed under the GNU General Public License, version 2 or later.
 

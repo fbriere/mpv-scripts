@@ -51,7 +51,7 @@
 
     AUTHOR:
 
-    Frédéric Brière <fbriere@fbriere.net>
+    Frédéric Brière (fbriere@fbriere.net)
 
     Licensed under the GNU General Public License, version 2 or later.
 
