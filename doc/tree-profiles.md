@@ -139,8 +139,9 @@ Your *mpv.conf* could contain the following:
 
 ## SUB-PATHS FEATURE
 
-This script can also automatically add a `sub-paths` entry referring
-to a directory structure mirroring that of the media files.
+This script can also automatically add a `sub-file-paths` (formerly
+`sub-paths`) entry referring to a directory structure mirroring that of the
+media files.
 
 In other words, suppose your external subtitles are arranged thusly:
 
@@ -153,7 +154,7 @@ In other words, suppose your external subtitles are arranged thusly:
 
 After setting the `sub-paths-dir` script option to `/nas/subtitles`,
 the appropriate directory will automatically be appended to the
-`sub-paths` option for every file under */media/anime*.
+`sub-file-paths` option for every file under */media/anime*.
 
 You can set this option globally, by adding it to
 *~/.config/mpv/lua-settings/tree_profiles.conf*:

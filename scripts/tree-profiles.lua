@@ -139,8 +139,9 @@
 
     SUB-PATHS FEATURE:
 
-    This script can also automatically add a `sub-paths` entry referring
-    to a directory structure mirroring that of the media files.
+    This script can also automatically add a `sub-file-paths` (formerly
+    `sub-paths`) entry referring to a directory structure mirroring that of the
+    media files.
 
     In other words, suppose your external subtitles are arranged thusly:
 
@@ -153,7 +154,7 @@
 
     After setting the `sub-paths-dir` script option to `/nas/subtitles`,
     the appropriate directory will automatically be appended to the
-    `sub-paths` option for every file under */media/anime*.
+    `sub-file-paths` option for every file under */media/anime*.
 
     You can set this option globally, by adding it to
     *~/.config/mpv/lua-settings/tree_profiles.conf*:
@@ -407,11 +408,17 @@ local function apply_profiles(parent_profile, child_path)
     end)
 end
 
--- Add <sub-paths-dir>/<child-path-dir> to sub-paths
+-- This option had a different name before mpv 0.26.0
+-- (FIXME: Does this mean we should rename our own option as well?)
+local sub_paths_option_name = "sub-file-paths"
+if not mp.get_property(sub_paths_option_name) then
+    sub_paths_option_name = "sub-paths"
+end
+-- Add <sub-paths-dir>/<child-path-dir> to sub-file-paths
 local function add_sub_path(options, child_path)
     local sub_paths_dir = options["sub-paths-dir"]
     if sub_paths_dir == "" then
-        msg.verbose("sub-paths-dir not set -- not adding any sub-paths")
+        msg.verbose("sub-paths-dir not set -- not adding any", sub_paths_option_name)
         return
     end
 
@@ -423,16 +430,16 @@ local function add_sub_path(options, child_path)
         sub_paths_dir = utils.join_path(sub_paths_dir, child_path_dir)
     end
 
-    msg.verbose("Adding", sub_paths_dir, "to sub-paths")
+    msg.verbose("Adding", sub_paths_dir, "to", sub_paths_option_name)
 
-    local sub_paths = mp.get_property("sub-paths")
+    local sub_paths = mp.get_property(sub_paths_option_name)
     if sub_paths ~= "" then
         sub_paths = sub_paths .. ':' .. sub_paths_dir
     else
         sub_paths = sub_paths_dir
     end
-    msg.debug("Setting sub-paths to", sub_paths)
-    mp.set_property("sub-paths", sub_paths)
+    msg.debug("Setting", sub_paths_option_name, "to", sub_paths)
+    mp.set_property(sub_paths_option_name, sub_paths)
 end
 
 -- This probably won't be of any use to you at the moment.  :-)
