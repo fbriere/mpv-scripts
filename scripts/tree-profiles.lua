@@ -359,6 +359,11 @@ local function apply_local_profile(profile, depth)
                 msg.error(string.format("Unknown profile %q.", v))
             end
         else
+            -- Convert "no-foo" to "foo=no"
+            if k:startswith("no-") then
+                k = k:sub(4)
+                v = "no"
+            end
             -- FILE_LOCAL_FLAGS implies M_SETOPT_PRESERVE_CMDLINE
             if not mp.get_property_bool(string.format("option-info/%s/set-from-commandline", k)) then
                 msg.debug(string.format("Locally setting %s = %q", k, v))
