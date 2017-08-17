@@ -266,6 +266,10 @@ local function file_exists(name)
     return posix.stat(name) ~= nil
 end
 
+local function isdir(name)
+    return utils.readdir(name .. "/.") ~= nil
+end
+
 -- Basically equivalent to Python's os.path.relpath(), but returns nil
 -- if path is not located under parent.
 local function child_relpath(path, parent)
@@ -471,6 +475,12 @@ local function on_start_file()
     }
 
     local fullpath = utils.join_path(mp.get_property("working-directory"), mp.get_property("path"))
+
+    if isdir(fullpath) then
+        msg.verbose("This is a directory -- skipping")
+        return
+    end
+
     local parent_profile, child_path = find_lineage(fullpath)
     if not parent_profile then
         msg.verbose("No parent profile found -- exiting")
