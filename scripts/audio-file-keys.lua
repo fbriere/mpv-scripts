@@ -19,14 +19,14 @@
 
     USAGE:
 
-    Simply add some key bindings to the `audio-file` input session in
+    Simply add some key bindings to the `audio-file` input section in
     *~/.config/mpv/input.conf*, such as:
 
         # Have Page Up/Down emulate Shift + Page Up/Down
         PGUP  {audio-file} keypress Shift+PGUP
         PGDWN {audio-file} keypress Shift+PGDWN
 
-    You can define a different name for the input session used by this script
+    You can define a different name for the input section used by this script
     by setting it in *~/.config/mpv/lua-settings/audio_file_keys.conf*:
 
         section=some-other-name
