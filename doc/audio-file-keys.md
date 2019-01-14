@@ -27,12 +27,6 @@ input section in *~/.config/mpv/input.conf*, such as:
     PGUP  {audio-file} keypress Shift+PGUP
     PGDWN {audio-file} keypress Shift+PGDWN
 
-If the name `audio-file` doesn't appeal to you for some reason, a
-different input section name can be defined in
-*~/.config/mpv/lua-settings/audio_file_keys.conf*:
-
-    section=some-other-name
-
 
 ## REQUIREMENTS
 
