@@ -137,6 +137,28 @@
         profile-desc="Fullmetal Alchemist/*/* S01E{13,15,{18..20}}.mkv"
 
 
+    PSEUDO-PROPERTIES:
+
+    The configuration of any profile applied by this script can make use of the
+    following "pseudo-properties", which will be expanded to their respective
+    value:
+
+    - `${tree-profiles-parent}`: Name of the parent profile matching the
+    currently played file.
+
+    - `${tree-profiles-path}`: Path of the currently played file, relative to
+    the parent profile's directory.  (Basically, `${path}` with the parent
+    profile's directory stripped out.)
+
+    - `${tree-profiles-directory}`: Directory of the currently played file,
+    relative to the parent profile's directory.  (Basically, the directory
+    portion of `${tree-profiles-path}`.)
+
+    (Note that these are not actual, real properties; they can only be used in
+    *mpv.conf*, and only in profiles applied by this script.  Furthermore,
+    only the plain `${NAME}` form is supported.)
+
+
     SUB-PATHS FEATURE:
 
     This script can also automatically add a `sub-file-paths` (formerly
@@ -271,6 +293,21 @@ local function isdir(name)
     return utils.readdir(name .. "/.") ~= nil
 end
 
+-- Create a table of pseudo-properties
+local function get_pseudo_props(parent_profile, child_path)
+    local pseudo_props = {
+        ["parent"] = parent_profile.name,
+        ["path"] = child_path,
+    }
+
+    local child_path_dir, _ = utils.split_path(child_path)
+    -- Cosmetic nitpicking: That trailing "/" just looks annoying to me
+    child_path_dir = child_path_dir:gsub("/+$", "")
+    pseudo_props["directory"] = child_path_dir
+
+    return pseudo_props
+end
+
 -- Basically equivalent to Python's os.path.relpath(), but returns nil
 -- if path is not located under parent.
 local function child_relpath(path, parent)
@@ -334,7 +371,7 @@ end
 -- Apply a profile locally to the current playing file.  Options set here
 -- will be restored to their previous value on the next file.
 local MAX_PROFILE_DEPTH = 20
-local function apply_local_profile(profile, depth)
+local function apply_local_profile(profile, pseudo_props, depth)
     local function find_profile_by_name(name)
         for _,p in ipairs(mp.get_property_native("profile-list")) do
             if p.name == name then
@@ -359,7 +396,7 @@ local function apply_local_profile(profile, depth)
             local subprofile = find_profile_by_name(v)
             if subprofile then
                 msg.debug(string.format("Locally including profile %q", v))
-                apply_local_profile(subprofile, depth)
+                apply_local_profile(subprofile, pseudo_props, depth)
             else
                 msg.error(string.format("Unknown profile %q.", v))
             end
@@ -368,6 +405,13 @@ local function apply_local_profile(profile, depth)
             if k:startswith("no-") then
                 k = k:sub(4)
                 v = "no"
+            end
+            -- Expand pseudo-properties
+            for prop_name, prop_value in pairs(pseudo_props) do
+                local pattern = "${tree-profiles-" .. prop_name .. "}"
+                -- Escape all non-alphanumeric characters
+                pattern = pattern:gsub("([^%w])", "%%%1")
+                v = v:gsub(pattern, prop_value)
             end
             -- FILE_LOCAL_FLAGS implies M_SETOPT_PRESERVE_CMDLINE
             if not mp.get_property_bool(string.format("option-info/%s/set-from-commandline", k)) then
@@ -381,9 +425,9 @@ local function apply_local_profile(profile, depth)
 end
 
 -- Apply a parent profile and all applicable sub-profiles.
-local function apply_profiles(parent_profile, child_path)
+local function apply_profiles(parent_profile, child_path, pseudo_props)
     msg.verbose("Applying profile", parent_profile.name)
-    apply_local_profile(parent_profile)
+    apply_local_profile(parent_profile, pseudo_props)
 
     walk_path(child_path, function(step)
         msg.debug(string.format("Checking for profiles matching '%s'", step))
@@ -396,7 +440,7 @@ local function apply_profiles(parent_profile, child_path)
                     for _, glob in ipairs(brace_expand.expand(desc)) do
                         if posix.fnmatch(glob, step, posix.FNM_PATHNAME) then
                             msg.verbose("Applying profile", profile.name)
-                            apply_local_profile(profile)
+                            apply_local_profile(profile, pseudo_props)
                         end
                     end
                 else
@@ -474,7 +518,8 @@ local function on_start_file()
         -- TODO: Also check for file_confname in config dir (~~)
     end
 
-    apply_profiles(parent_profile, child_path)
+    local pseudo_props = get_pseudo_props(parent_profile, child_path)
+    apply_profiles(parent_profile, child_path, pseudo_props)
 
     -- Applying profiles may have changed script-opts
     read_options(options)

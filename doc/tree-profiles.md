@@ -137,6 +137,28 @@ Your *mpv.conf* could contain the following:
     profile-desc="Fullmetal Alchemist/*/* S01E{13,15,{18..20}}.mkv"
 
 
+## PSEUDO-PROPERTIES
+
+The configuration of any profile applied by this script can make use of the
+following "pseudo-properties", which will be expanded to their respective
+value:
+
+- `${tree-profiles-parent}`: Name of the parent profile matching the
+currently played file.
+
+- `${tree-profiles-path}`: Path of the currently played file, relative to
+the parent profile's directory.  (Basically, `${path}` with the parent
+profile's directory stripped out.)
+
+- `${tree-profiles-directory}`: Directory of the currently played file,
+relative to the parent profile's directory.  (Basically, the directory
+portion of `${tree-profiles-path}`.)
+
+(Note that these are not actual, real properties; they can only be used in
+*mpv.conf*, and only in profiles applied by this script.  Furthermore,
+only the plain `${NAME}` form is supported.)
+
+
 ## SUB-PATHS FEATURE
 
 This script can also automatically add a `sub-file-paths` (formerly
