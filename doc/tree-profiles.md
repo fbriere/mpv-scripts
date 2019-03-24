@@ -165,11 +165,11 @@ Options set in a profile applied by this script will only take effect
 on individual files, and will be restored to their previous value
 afterwards.
 
-This script will not apply any profiles in the presence of a
-file-specific or directory-specific configuration file.  You can
-therefore disable/override it for specific files or directories by
-creating a (possibly empty) *FILE.conf* or *DIR/mpv.conf* file.
-(This configuration file could then pull in the original profile if
+If `use-filedir-conf` is enabled, this script will not apply any profiles
+in the presence of a file-specific or directory-specific configuration
+file.  You can therefore disable/override it for specific files or
+directories by creating a (possibly empty) *FILE.conf* or *DIR/mpv.conf*
+file.  (This configuration file could then pull in the original profile if
 desired.)
 
 
