@@ -427,7 +427,9 @@ local function apply_profiles(parent_profile, child_path, pseudo_props)
 end
 
 local function on_start_file()
-    local options = {}
+    local options = {
+        ["sub-paths-dir"] = "",
+    }
 
     local fullpath = utils.join_path(mp.get_property("working-directory"), mp.get_property("path"))
 
