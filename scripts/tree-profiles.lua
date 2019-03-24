@@ -159,36 +159,6 @@
     only the plain `${NAME}` form is supported.)
 
 
-    SUB-PATHS FEATURE:
-
-    This script can also automatically add a `sub-file-paths` (formerly
-    `sub-paths`) entry referring to a directory structure mirroring that of the
-    media files.
-
-    In other words, suppose your external subtitles are arranged thusly:
-
-        /nas/
-            subtitles/
-                Fullmetal Alchemist/
-                    Season 1/
-                        Fullmetal Alchemist S01E01.ass
-                        ...
-
-    After setting the `sub-paths-dir` script option to `/nas/subtitles`,
-    the appropriate directory will automatically be appended to the
-    `sub-file-paths` option for every file under */media/anime*.
-
-    You can set this option globally, by adding it to
-    *~/.config/mpv/lua-settings/tree_profiles.conf*:
-
-        sub-paths-dir=/nas/subtitles
-
-    You can also set it on the command-line (or in regular configuration
-    files) with the `script-opts` option:
-
-        --script-opts=tree_profiles-sub-paths-dir=/nas/subtitles
-
-
     ADDITIONAL FEATURES:
 
     Options set in a profile applied by this script will only take effect
@@ -225,6 +195,10 @@
     I have yet to determine how this script should behave in the presence
     of symbolic links.  At the moment, symlinks are fully resolved before
     comparing paths.  This may change in the future.
+
+    The `sub-paths-dir` feature has now been removed; it can be emulated by
+    adding `sub-file-paths=<sub-paths-dir>/${tree-profiles-directory}` to each
+    parent profile.
 
 
     AUTHOR:
@@ -452,44 +426,8 @@ local function apply_profiles(parent_profile, child_path, pseudo_props)
     end)
 end
 
--- This option had a different name before mpv 0.26.0
--- (FIXME: Does this mean we should rename our own option as well?)
-local sub_paths_option_name = "sub-file-paths"
-if not mp.get_property(sub_paths_option_name) then
-    sub_paths_option_name = "sub-paths"
-end
--- Add <sub-paths-dir>/<child-path-dir> to sub-file-paths
-local function add_sub_path(options, child_path)
-    local sub_paths_dir = options["sub-paths-dir"]
-    if sub_paths_dir == "" then
-        msg.verbose("sub-paths-dir not set -- not adding any", sub_paths_option_name)
-        return
-    end
-
-    local child_path_dir, _ = utils.split_path(child_path)
-    -- Cosmetic nitpicking: That trailing "/" just looks annoying to me
-    child_path_dir = child_path_dir:gsub("/+$", "")
-    -- Cosmetic nitpicking: Adding a "." component does nothing useful
-    if child_path_dir ~= "." then
-        sub_paths_dir = utils.join_path(sub_paths_dir, child_path_dir)
-    end
-
-    msg.verbose("Adding", sub_paths_dir, "to", sub_paths_option_name)
-
-    local sub_paths = mp.get_property(sub_paths_option_name)
-    if sub_paths ~= "" then
-        sub_paths = sub_paths .. ':' .. sub_paths_dir
-    else
-        sub_paths = sub_paths_dir
-    end
-    msg.debug("Setting", sub_paths_option_name, "to", sub_paths)
-    mp.set_property(sub_paths_option_name, sub_paths)
-end
-
 local function on_start_file()
-    local options = {
-        ["sub-paths-dir"] = "",
-    }
+    local options = {}
 
     local fullpath = utils.join_path(mp.get_property("working-directory"), mp.get_property("path"))
 
@@ -523,6 +461,10 @@ local function on_start_file()
 
     -- Applying profiles may have changed script-opts
     read_options(options)
-    add_sub_path(options, child_path)
+    -- Deprecation warning for sub-paths-dir
+    if options["sub-paths-dir"] ~= "" then
+        msg.warn("sub-paths-dir script option support has been removed")
+        msg.warn("Use ${tree-profiles-directory} in the profile's configuration instead")
+    end
 end
 mp.register_event("start-file", on_start_file)

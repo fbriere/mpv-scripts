@@ -159,36 +159,6 @@ portion of `${tree-profiles-path}`.)
 only the plain `${NAME}` form is supported.)
 
 
-## SUB-PATHS FEATURE
-
-This script can also automatically add a `sub-file-paths` (formerly
-`sub-paths`) entry referring to a directory structure mirroring that of the
-media files.
-
-In other words, suppose your external subtitles are arranged thusly:
-
-    /nas/
-        subtitles/
-            Fullmetal Alchemist/
-                Season 1/
-                    Fullmetal Alchemist S01E01.ass
-                    ...
-
-After setting the `sub-paths-dir` script option to `/nas/subtitles`,
-the appropriate directory will automatically be appended to the
-`sub-file-paths` option for every file under */media/anime*.
-
-You can set this option globally, by adding it to
-*~/.config/mpv/lua-settings/tree_profiles.conf*:
-
-    sub-paths-dir=/nas/subtitles
-
-You can also set it on the command-line (or in regular configuration
-files) with the `script-opts` option:
-
-    --script-opts=tree_profiles-sub-paths-dir=/nas/subtitles
-
-
 ## ADDITIONAL FEATURES
 
 Options set in a profile applied by this script will only take effect
@@ -225,6 +195,10 @@ a pattern, and therefore does not support wildcards.
 I have yet to determine how this script should behave in the presence
 of symbolic links.  At the moment, symlinks are fully resolved before
 comparing paths.  This may change in the future.
+
+The `sub-paths-dir` feature has now been removed; it can be emulated by
+adding `sub-file-paths=<sub-paths-dir>/${tree-profiles-directory}` to each
+parent profile.
 
 
 ## AUTHOR
