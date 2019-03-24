@@ -442,43 +442,9 @@ local function add_sub_path(options, child_path)
     mp.set_property(sub_paths_option_name, sub_paths)
 end
 
--- This probably won't be of any use to you at the moment.  :-)
-local function load_chapters_file(options, child_path)
-    local function find_chapters_file(dir, filename_no_ext)
-        -- NOTE: I made these up  :-)
-        local extensions = { "chp", "chapters" }
-
-        for _, ext in ipairs(extensions) do
-            local chapname = utils.join_path(dir, filename_no_ext .. "." .. ext)
-            msg.debug("Checking for chapters file", chapname)
-            if file_exists(chapname) then
-                msg.debug("Chapters file found")
-                return chapname
-            end
-        end
-    end
-
-    local chapters_file_dir = options["chapters-file-dir"]
-    if chapters_file_dir == "" then
-        msg.verbose("chapters-file-dir not set")
-        return
-    end
-    chapters_file_dir = utils.join_path(chapters_file_dir, (utils.split_path(child_path)))
-
-    local dirname, filename = utils.split_path(mp.get_property("path"))
-    local chapters_file = find_chapters_file(
-        utils.join_path(dirname, chapters_file_dir),
-        mp.get_property("filename/no-ext"))
-    if chapters_file then
-        msg.verbose("Setting chapters file to", chapters_file)
-        mp.set_property("chapters-file", chapters_file)
-    end
-end
-
 local function on_start_file()
     local options = {
         ["sub-paths-dir"] = "",
-        ["chapters-file-dir"] = "",
     }
 
     local fullpath = utils.join_path(mp.get_property("working-directory"), mp.get_property("path"))
@@ -513,6 +479,5 @@ local function on_start_file()
     -- Applying profiles may have changed script-opts
     read_options(options)
     add_sub_path(options, child_path)
-    load_chapters_file(options, child_path)
 end
 mp.register_event("start-file", on_start_file)
