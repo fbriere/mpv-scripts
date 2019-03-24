@@ -179,9 +179,6 @@ This script will output some additional information on higher
 verbosity levels (`-v`).  To increase the verbosity for this script
 only, use `--msg-level=tree_profiles=v` (or `=debug` for more output).
 
-The aforementioned override does not take into account *.conf*
-files in *~/.config/mpv/* at the moment.
-
 The `tree:` argument should really be an absolute path (although this
 is not mandated for now).  Otherwise, it will be relative to the
 current directory, which could get rather confusing.

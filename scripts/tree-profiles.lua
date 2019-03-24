@@ -179,9 +179,6 @@
     verbosity levels (`-v`).  To increase the verbosity for this script
     only, use `--msg-level=tree_profiles=v` (or `=debug` for more output).
 
-    The aforementioned override does not take into account *.conf*
-    files in *~/.config/mpv/* at the moment.
-
     The `tree:` argument should really be an absolute path (although this
     is not mandated for now).  Otherwise, it will be relative to the
     current directory, which could get rather confusing.
@@ -455,7 +452,10 @@ local function on_start_file()
             msg.verbose("file-specific configuration file found -- quitting")
             return
         end
-        -- TODO: Also check for file_confname in config dir (~~)
+        if mp.find_config_file(file_confname) then
+            msg.verbose("file-specific configuration file found -- quitting")
+            return
+        end
     end
 
     local pseudo_props = get_pseudo_props(parent_profile, child_path)
