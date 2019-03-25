@@ -179,12 +179,12 @@ This script will output some additional information on higher
 verbosity levels (`-v`).  To increase the verbosity for this script
 only, use `--msg-level=tree_profiles=v` (or `=debug` for more output).
 
+Any leading `~/` in a `tree:` argument will be expanded to the user's
+home directory.  (Other `~~` prefixes are currently not supported.)
+
 The `tree:` argument should really be an absolute path (although this
 is not mandated for now).  Otherwise, it will be relative to the
 current directory, which could get rather confusing.
-
-Unfortunately, `~` prefixes are currently *not* supported.  (This may
-change in the future.)
 
 Keep in mind that the `tree:` argument is a plain directory name, not
 a pattern, and therefore does not support wildcards.

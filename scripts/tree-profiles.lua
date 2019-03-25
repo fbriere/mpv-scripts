@@ -179,12 +179,12 @@
     verbosity levels (`-v`).  To increase the verbosity for this script
     only, use `--msg-level=tree_profiles=v` (or `=debug` for more output).
 
+    Any leading `~/` in a `tree:` argument will be expanded to the user's
+    home directory.  (Other `~~` prefixes are currently not supported.)
+
     The `tree:` argument should really be an absolute path (although this
     is not mandated for now).  Otherwise, it will be relative to the
     current directory, which could get rather confusing.
-
-    Unfortunately, `~` prefixes are currently *not* supported.  (This may
-    change in the future.)
 
     Keep in mind that the `tree:` argument is a plain directory name, not
     a pattern, and therefore does not support wildcards.
@@ -279,6 +279,20 @@ local function get_pseudo_props(parent_profile, child_path)
     return pseudo_props
 end
 
+-- Expand any leading "~/" in a path
+local function expand_path(path)
+    if path:sub(1, 2) == "~/" then
+        local home = os.getenv("HOME") or os.getenv("USERPROFILE")
+        if home then
+            path = home .. path:sub(2)
+        else
+            msg.warn("Failed to get home directory -- neither $HOME nor $USERPROFILE is set")
+        end
+    end
+
+    return path
+end
+
 -- Basically equivalent to Python's os.path.relpath(), but returns nil
 -- if path is not located under parent.
 local function child_relpath(path, parent)
@@ -318,7 +332,7 @@ local function find_lineage(fullpath)
         local desc = profile["profile-desc"]
         if desc and desc:startswith("tree:") then
             local dir = desc:sub(6)
-            -- TODO: Support paths starting with "~"
+            dir = expand_path(dir)
             msg.debug(string.format("Trying %s (%s)", profile.name, dir))
             local child_path = child_relpath(fullpath, dir)
             if child_path then
