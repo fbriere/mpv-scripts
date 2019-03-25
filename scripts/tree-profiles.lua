@@ -258,7 +258,18 @@ function string:startswith(prefix)
 end
 
 local function file_exists(name)
-    return posix.stat(name) ~= nil
+    if posix then
+        return posix.stat(name) ~= nil
+    else
+        -- Copied from https://stackoverflow.com/a/4991602
+        local f = io.open(name, "r")
+        if f ~= nil then
+            io.close(f)
+            return true
+        else
+            return false
+        end
+    end
 end
 
 local function isdir(name)
