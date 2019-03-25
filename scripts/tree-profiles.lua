@@ -308,9 +308,11 @@ end
 -- Basically equivalent to Python's os.path.relpath(), but returns nil
 -- if path is not located under parent.
 local function child_relpath(path, parent)
-    -- FIXME: realpath() may or may not be the right solution
-    path = posix.realpath(path)
-    parent = posix.realpath(parent)
+    if posix then
+        -- FIXME: realpath() may or may not be the right solution
+        path = posix.realpath(path)
+        parent = posix.realpath(parent)
+    end
 
     if not parent or not path then
         return nil
