@@ -231,21 +231,24 @@ do
     end
 end
 
--- This is currently required for fnmatch() and realpath()
--- TODO: Could this be made optional?
-local posix = require 'posix'
-
 -- Optional require(), copied from https://stackoverflow.com/a/17878208
 local function prequire(m)
     local ok, err = pcall(require, m)
     if not ok then return nil, err end
     return err
 end
+
 -- Don't fail if brace-expand.lua wasn't installed alongside us
 local brace_expand = prequire 'brace-expand'
 if not brace_expand then
     msg.warn("brace-expand.lua not found -- brace expansion disabled")
     brace_expand = { expand = function(x) return {x} end }
+end
+
+-- Provides us with a better fnmatch(), as well as realpath() and stat()
+local posix = prequire 'posix'
+if not posix then
+    msg.debug("luaposix not found -- falling back on alternatives")
 end
 
 
