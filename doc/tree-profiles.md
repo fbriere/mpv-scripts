@@ -26,11 +26,12 @@ illustrated in the [Example](#example) section below.
 
 - This script requires mpv version 0.21.0 or later.
 
-- [luaposix](https://github.com/luaposix/luaposix) is also required at the
-moment.  (Therefore this script won't work on Windows, at least for now.)
-
 - brace-expand.lua (optional, from the same repository as this script)
 will enable the use of Bash-style brace expansions.
+
+- [luaposix](https://github.com/luaposix/luaposix) (optional) will provide
+better support for wildcards, as well as symbolic link resolution (see the
+[Notes](#notes) section below).
 
 
 ## EXAMPLE
@@ -112,7 +113,7 @@ Your *mpv.conf* could contain the following:
     [anime/fma-s1-ep01]
     profile-desc="Fullmetal Alchemist/Season 1/Fullmetal Alchemist S01E01.mkv"
 
-    # Sub-profile descriptions are actually fnmatch(3) patterns, so
+    # Sub-profile descriptions are actually glob(7) patterns, so
     # wildcards ('?', '*', '[') are supported:
     #
     [anime/fma-s1-ep02-03-04]
@@ -189,10 +190,15 @@ current directory, which could get rather confusing.
 Keep in mind that the `tree:` argument is a plain directory name, not
 a pattern, and therefore does not support wildcards.
 
+The wildcard support provided by this script is somewhat simplistic, and
+does not faithfully adhere to the `glob(7)` specification (mostly regarding
+bracket expressions).  If luaposix is installed, the real
+standard-compliant `fnmatch(3)` will be used instead.
+
 I have yet to determine how this script should behave in the presence
-of symbolic links.  At the moment, symlinks are fully resolved before
-comparing paths for sub-profiles, but not for the parent profile.  This
-may change in the future.
+of symbolic links.  At the moment, provided that luaposix is installed,
+symlinks are fully resolved before comparing paths for sub-profiles, but
+not for the parent profile.  This may change in the future.
 
 The `sub-paths-dir` feature has now been removed; it can be emulated by
 adding `sub-file-paths=<sub-paths-dir>/${tree-profiles-directory}` to each
