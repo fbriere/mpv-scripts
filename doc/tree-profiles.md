@@ -26,8 +26,8 @@ illustrated in the [Example](#example) section below.
 
 - This script requires mpv version 0.21.0 or later.
 
-- luaposix is also required at the moment.  (Therefore this script won't
-work on Windows, at least for now.)
+- [luaposix](https://github.com/luaposix/luaposix) is also required at the
+moment.  (Therefore this script won't work on Windows, at least for now.)
 
 - brace-expand.lua (optional, from the same repository as this script)
 will enable the use of Bash-style brace expansions.
