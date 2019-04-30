@@ -191,7 +191,8 @@
 
     I have yet to determine how this script should behave in the presence
     of symbolic links.  At the moment, symlinks are fully resolved before
-    comparing paths.  This may change in the future.
+    comparing paths for sub-profiles, but not for the parent profile.  This
+    may change in the future.
 
     The `sub-paths-dir` feature has now been removed; it can be emulated by
     adding `sub-file-paths=<sub-paths-dir>/${tree-profiles-directory}` to each
