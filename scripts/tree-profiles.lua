@@ -276,6 +276,73 @@ local function isdir(name)
     return utils.readdir(name .. "/.") ~= nil
 end
 
+local function fnmatch(glob, path)
+    if posix then
+        return posix.fnmatch(glob, path, posix.FNM_PATHNAME)
+    else
+        -- Our homebrewed version, without the corner cases.  Inspired by
+        -- https://github.com/gordonbrander/lettersmith/blob/master/lettersmith/wildcards.lua
+
+        -- Convert a whole wildcard pattern into a Lua pattern
+        local function wildcard(s)
+            -- Convert the contents of a single bracket expression
+            local function bracket_expr(s)
+                -- BUG: ']' should be allowed unescaped as first char
+                -- BUG: '-' should be left as-is as first/last char
+                -- BUG: '[' and '\' should stand for themselves
+                -- BUG: '/' should never match even if explicitly included
+                s = s
+                    :gsub("^[%!%^]", "__CCLASS_COMPLEMENT__")
+                    :gsub("%-",  "__CCLASS_DASH__")
+                    -- '?' and '*' do not act as wildcards here
+                    :gsub("%?", "__ESCAPED_" .. string.byte("?") .. "__")
+                    :gsub("%*", "__ESCAPED_" .. string.byte("*") .. "__")
+                return "__CCLASS_START__" .. s .. "__CCLASS_END__"
+            end
+
+            s = s
+                -- Escaped characters
+                -- BUG: "\" should no longer escape within brackets
+                :gsub("%\\(%W)", function(s)
+                        return "__ESCAPED_" .. string.byte(s) .. "__"
+                    end)
+                -- Alpha-numeric characters should be unescaped
+                :gsub("%\\(%w)", "%1")
+
+                -- Bracket expressions
+                :gsub("%[(.-)%]", bracket_expr)
+
+                -- The usual wildcards
+                :gsub("%*",   "__ANY_STRING__")
+                :gsub("%?",   "__ANY_CHAR__")
+
+                -- Escape any non-alpha character (except "_", which we need
+                -- to be left intact -- it's not magic anyway)
+                :gsub("[^%w_ ]", "%%%1")
+
+                -- Replace all tokens with their Lua counterpart
+                -- BUG: Wildcards should not match any leading '.'
+                :gsub("__ANY_CHAR__", "[^/]")
+                :gsub("__ANY_STRING__", "[^/]*")
+                :gsub("__CCLASS_START__", "[")
+                :gsub("__CCLASS_COMPLEMENT__", "^")
+                :gsub("__CCLASS_DASH__", "-")
+                :gsub("__CCLASS_END__", "]")
+                :gsub("__ESCAPED_(%d+)__", function(n)
+                        return "%" .. string.char(n)
+                    end)
+
+            -- Anchor the pattern at beginning and end
+            return "^" .. s .. "$"
+        end
+
+        local pattern = wildcard(glob)
+        msg.debug(string.format("Converted wildcard pattern '%s' into Lua pattern '%s'", glob, pattern))
+        return path:match(pattern)
+    end
+end
+
+
 -- Create a table of pseudo-properties
 local function get_pseudo_props(parent_profile, child_path)
     local pseudo_props = {
@@ -437,7 +504,7 @@ local function apply_profiles(parent_profile, child_path, pseudo_props)
                 if desc then
                     msg.debug(string.format("Testing against %s ('%s')", profile.name, desc))
                     for _, glob in ipairs(brace_expand.expand(desc)) do
-                        if posix.fnmatch(glob, step, posix.FNM_PATHNAME) then
+                        if fnmatch(glob, step) then
                             msg.verbose("Applying profile", profile.name)
                             apply_local_profile(profile, pseudo_props)
                         end
