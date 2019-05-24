@@ -26,11 +26,12 @@
 
     - This script requires mpv version 0.21.0 or later.
 
-    - [luaposix](https://github.com/luaposix/luaposix) is also required at the
-    moment.  (Therefore this script won't work on Windows, at least for now.)
-
     - brace-expand.lua (optional, from the same repository as this script)
     will enable the use of Bash-style brace expansions.
+
+    - [luaposix](https://github.com/luaposix/luaposix) (optional) will provide
+    better support for wildcards, as well as symbolic link resolution (see the
+    NOTES section below).
 
 
     EXAMPLE:
@@ -112,7 +113,7 @@
         [anime/fma-s1-ep01]
         profile-desc="Fullmetal Alchemist/Season 1/Fullmetal Alchemist S01E01.mkv"
 
-        # Sub-profile descriptions are actually fnmatch(3) patterns, so
+        # Sub-profile descriptions are actually glob(7) patterns, so
         # wildcards ('?', '*', '[') are supported:
         #
         [anime/fma-s1-ep02-03-04]
@@ -189,10 +190,15 @@
     Keep in mind that the `tree:` argument is a plain directory name, not
     a pattern, and therefore does not support wildcards.
 
+    The wildcard support provided by this script is somewhat simplistic, and
+    does not faithfully adhere to the `glob(7)` specification (mostly regarding
+    bracket expressions).  If luaposix is installed, the real
+    standard-compliant `fnmatch(3)` will be used instead.
+
     I have yet to determine how this script should behave in the presence
-    of symbolic links.  At the moment, symlinks are fully resolved before
-    comparing paths for sub-profiles, but not for the parent profile.  This
-    may change in the future.
+    of symbolic links.  At the moment, provided that luaposix is installed,
+    symlinks are fully resolved before comparing paths for sub-profiles, but
+    not for the parent profile.  This may change in the future.
 
     The `sub-paths-dir` feature has now been removed; it can be emulated by
     adding `sub-file-paths=<sub-paths-dir>/${tree-profiles-directory}` to each
@@ -231,21 +237,24 @@ do
     end
 end
 
--- This is currently required for fnmatch() and realpath()
--- TODO: Could this be made optional?
-local posix = require 'posix'
-
 -- Optional require(), copied from https://stackoverflow.com/a/17878208
 local function prequire(m)
     local ok, err = pcall(require, m)
     if not ok then return nil, err end
     return err
 end
+
 -- Don't fail if brace-expand.lua wasn't installed alongside us
 local brace_expand = prequire 'brace-expand'
 if not brace_expand then
     msg.warn("brace-expand.lua not found -- brace expansion disabled")
     brace_expand = { expand = function(x) return {x} end }
+end
+
+-- Provides us with a better fnmatch(), as well as realpath() and stat()
+local posix = prequire 'posix'
+if not posix then
+    msg.debug("luaposix not found -- falling back on alternatives")
 end
 
 
@@ -258,12 +267,90 @@ function string:startswith(prefix)
 end
 
 local function file_exists(name)
-    return posix.stat(name) ~= nil
+    if posix then
+        return posix.stat(name) ~= nil
+    else
+        -- Copied from https://stackoverflow.com/a/4991602
+        local f = io.open(name, "r")
+        if f ~= nil then
+            io.close(f)
+            return true
+        else
+            return false
+        end
+    end
 end
 
 local function isdir(name)
     return utils.readdir(name .. "/.") ~= nil
 end
+
+local function fnmatch(glob, path)
+    if posix then
+        return posix.fnmatch(glob, path, posix.FNM_PATHNAME)
+    else
+        -- Our homebrewed version, without the corner cases.  Inspired by
+        -- https://github.com/gordonbrander/lettersmith/blob/master/lettersmith/wildcards.lua
+
+        -- Convert a whole wildcard pattern into a Lua pattern
+        local function wildcard(s)
+            -- Convert the contents of a single bracket expression
+            local function bracket_expr(s)
+                -- BUG: ']' should be allowed unescaped as first char
+                -- BUG: '-' should be left as-is as first/last char
+                -- BUG: '[' and '\' should stand for themselves
+                -- BUG: '/' should never match even if explicitly included
+                s = s
+                    :gsub("^[%!%^]", "__CCLASS_COMPLEMENT__")
+                    :gsub("%-",  "__CCLASS_DASH__")
+                    -- '?' and '*' do not act as wildcards here
+                    :gsub("%?", "__ESCAPED_" .. string.byte("?") .. "__")
+                    :gsub("%*", "__ESCAPED_" .. string.byte("*") .. "__")
+                return "__CCLASS_START__" .. s .. "__CCLASS_END__"
+            end
+
+            s = s
+                -- Escaped characters
+                -- BUG: "\" should no longer escape within brackets
+                :gsub("%\\(%W)", function(s)
+                        return "__ESCAPED_" .. string.byte(s) .. "__"
+                    end)
+                -- Alpha-numeric characters should be unescaped
+                :gsub("%\\(%w)", "%1")
+
+                -- Bracket expressions
+                :gsub("%[(.-)%]", bracket_expr)
+
+                -- The usual wildcards
+                :gsub("%*",   "__ANY_STRING__")
+                :gsub("%?",   "__ANY_CHAR__")
+
+                -- Escape any non-alpha character (except "_", which we need
+                -- to be left intact -- it's not magic anyway)
+                :gsub("[^%w_ ]", "%%%1")
+
+                -- Replace all tokens with their Lua counterpart
+                -- BUG: Wildcards should not match any leading '.'
+                :gsub("__ANY_CHAR__", "[^/]")
+                :gsub("__ANY_STRING__", "[^/]*")
+                :gsub("__CCLASS_START__", "[")
+                :gsub("__CCLASS_COMPLEMENT__", "^")
+                :gsub("__CCLASS_DASH__", "-")
+                :gsub("__CCLASS_END__", "]")
+                :gsub("__ESCAPED_(%d+)__", function(n)
+                        return "%" .. string.char(n)
+                    end)
+
+            -- Anchor the pattern at beginning and end
+            return "^" .. s .. "$"
+        end
+
+        local pattern = wildcard(glob)
+        msg.debug(string.format("Converted wildcard pattern '%s' into Lua pattern '%s'", glob, pattern))
+        return path:match(pattern)
+    end
+end
+
 
 -- Create a table of pseudo-properties
 local function get_pseudo_props(parent_profile, child_path)
@@ -297,9 +384,11 @@ end
 -- Basically equivalent to Python's os.path.relpath(), but returns nil
 -- if path is not located under parent.
 local function child_relpath(path, parent)
-    -- FIXME: realpath() may or may not be the right solution
-    path = posix.realpath(path)
-    parent = posix.realpath(parent)
+    if posix then
+        -- FIXME: realpath() may or may not be the right solution
+        path = posix.realpath(path)
+        parent = posix.realpath(parent)
+    end
 
     if not parent or not path then
         return nil
@@ -424,7 +513,7 @@ local function apply_profiles(parent_profile, child_path, pseudo_props)
                 if desc then
                     msg.debug(string.format("Testing against %s ('%s')", profile.name, desc))
                     for _, glob in ipairs(brace_expand.expand(desc)) do
-                        if posix.fnmatch(glob, step, posix.FNM_PATHNAME) then
+                        if fnmatch(glob, step) then
                             msg.verbose("Applying profile", profile.name)
                             apply_local_profile(profile, pseudo_props)
                         end
