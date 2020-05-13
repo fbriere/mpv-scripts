@@ -247,8 +247,20 @@ end
 -- Don't fail if brace-expand.lua wasn't installed alongside us
 local brace_expand = prequire 'brace-expand'
 if not brace_expand then
-    msg.warn("brace-expand.lua not found -- brace expansion disabled")
-    brace_expand = { expand = function(x) return {x} end }
+    -- mpv 0.32.0 no longer appends the "scripts" directory to the Lua path,
+    -- so we have to load this module ourselves
+    local brace_expand_file = mp.find_config_file("scripts/brace-expand.lua")
+    if brace_expand_file then
+        msg.verbose("Manually loading brace-expand.lua in scripts/ directory")
+        f, err = loadfile(brace_expand_file)
+        if f then
+            brace_expand = f()
+        end
+    end
+    if not brace_expand then
+        msg.warn("brace-expand.lua not found -- brace expansion disabled")
+        brace_expand = { expand = function(x) return {x} end }
+    end
 end
 
 -- Provides us with a better fnmatch(), as well as realpath() and stat()
