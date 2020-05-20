@@ -539,7 +539,8 @@ local function apply_profiles(parent_profile, child_path, pseudo_props)
     end)
 end
 
-local function on_start_file()
+-- "on_load" hook callback for when a file is about to be loaded.
+local function on_load()
     local options = {
         ["sub-paths-dir"] = "",
     }
@@ -585,4 +586,8 @@ local function on_start_file()
         msg.warn("Use ${tree-profiles-directory} in the profile's configuration instead")
     end
 end
-mp.register_event("start-file", on_start_file)
+-- A priority value of 50 is recommended as neutral default value, while
+-- player/lua/ytdl_hook.lua uses a value of 10.  We settle for 20, since we
+-- want to make sure we'll kick in rather early.  (Maybe this should be a
+-- configurable option?)
+mp.add_hook("on_load", 20, on_load)
