@@ -491,35 +491,35 @@ local function apply_local_profile(profile, pseudo_props, depth)
     msg.debug(string.format("Locally applying profile %q (depth %d)", profile.name, depth))
 
     for _, option in ipairs(profile.options) do
-        k,v = option.key, option.value
+        local option_name, value = option.key, option.value
         -- TODO: Should we also handle "include"?  Others?
-        if k == "profile" then
-            local subprofile = find_profile_by_name(v)
+        if option_name == "profile" then
+            local subprofile = find_profile_by_name(value)
             if subprofile then
-                msg.debug(string.format("Locally including profile %q", v))
+                msg.debug(string.format("Locally including profile %q", value))
                 apply_local_profile(subprofile, pseudo_props, depth)
             else
-                msg.error(string.format("Unknown profile %q.", v))
+                msg.error(string.format("Unknown profile %q.", value))
             end
         else
             -- Convert "no-foo" to "foo=no"
-            if k:startswith("no-") then
-                k = k:sub(4)
-                v = "no"
+            if option_name:startswith("no-") then
+                option_name = option_name:sub(4)
+                value = "no"
             end
             -- Expand pseudo-properties
             for prop_name, prop_value in pairs(pseudo_props) do
                 local pattern = "${tree-profiles-" .. prop_name .. "}"
                 -- Escape all non-alphanumeric characters
                 pattern = pattern:gsub("([^%w])", "%%%1")
-                v = v:gsub(pattern, prop_value)
+                value = value:gsub(pattern, prop_value)
             end
             -- FILE_LOCAL_FLAGS implies M_SETOPT_PRESERVE_CMDLINE
-            if not mp.get_property_bool(string.format("option-info/%s/set-from-commandline", k)) then
-                msg.debug(string.format("Locally setting %s = %q", k, v))
-                mp.set_property(string.format("file-local-options/%s", k), v)
+            if not mp.get_property_bool(string.format("option-info/%s/set-from-commandline", option_name)) then
+                msg.debug(string.format("Locally setting %s = %q", option_name, value))
+                mp.set_property(string.format("file-local-options/%s", option_name), value)
             else
-                msg.verbose(string.format("Option %s was set on command-line -- leaving it as-is", k))
+                msg.verbose(string.format("Option %s was set on command-line -- leaving it as-is", option_name))
             end
         end
     end
