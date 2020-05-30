@@ -224,6 +224,11 @@ local msg = require 'mp.msg'
 local utils = require 'mp.utils'
 require 'mp.options'
 
+-- msg.trace() was added in 0.28.0 -- define it ourselves if it's missing
+if msg.trace == nil then
+    msg.trace = function(...) return mp.log("trace", ...) end
+end
+
 -- The "profile-list" property was introduced in v0.21.0
 do
     local prop, err = mp.get_property("profile-list")
