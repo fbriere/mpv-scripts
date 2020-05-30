@@ -249,8 +249,10 @@ local function prequire(m)
     return err
 end
 
--- Don't fail if brace-expand.lua wasn't installed alongside us
+-- Try to load brace-expand.lua if available
 local brace_expand = prequire 'brace-expand'
+-- Only warn a single time if brace-expand.lua is required but missing
+local brace_expand_warning_issued
 if not brace_expand then
     -- mpv 0.32.0 no longer appends the "scripts" directory to the Lua path,
     -- so we have to load this module ourselves
@@ -263,8 +265,15 @@ if not brace_expand then
         end
     end
     if not brace_expand then
-        msg.warn("brace-expand.lua not found -- brace expansion disabled")
-        brace_expand = { expand = function(x) return {x} end }
+        -- Install a fake module that does nothing but emit a warning if it
+        -- looks like brace expansion is required
+        brace_expand = { expand = function(s)
+            if s:find('{') and not brace_expand_warning_issued then
+                msg.warn("brace-expand.lua not found -- brace expansion not supported")
+                brace_expand_warning_issued = true
+            end
+            return {s}
+        end }
     end
 end
 
