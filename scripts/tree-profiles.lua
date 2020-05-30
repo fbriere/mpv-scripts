@@ -469,6 +469,195 @@ local function find_lineage(fullpath)
     end
 end
 
+--[[
+
+    LIST OPTIONS COMPATIBILITY HACKS
+
+    List options were overhauled in version 0.26.0: the related properties were
+    renamed (e.g. "sub-file" => "sub-files") and action suffixes were
+    introduced (e.g. "sub-files-set"), with the original option name now being
+    an alias to the "append" action (e.g. "sub-file" => "sub-files-append").
+
+    This aliasing was only meant for the CLI and config file; scripts were now
+    supposed to either use action suffixes or set the new property as a whole,
+    with the original (deprecated) option name being supported as a fallback
+    until 0.29.0.
+
+    Unfortunately, action suffixes (including the "append" action to which the
+    old option name was aliased) did not work when using the
+    "file-local-options/" prefix, requiring us to parse[*] and apply these
+    actions ourselves.  And while 0.29.0 introduced a 'change-list' command
+    that could take care of the second part, it too sufferred from the same
+    issue until 0.31.0.
+
+    As a result, we provide our own (inferior) version of 'change-list', and
+    use it for versions affected by these bugs.
+
+    [*] To be fair, we still need to parse these options to avoid overriding
+        command-line options.
+
+--]]
+
+-- Whether list option names should be parsed for action suffixes
+local supports_list_option_actions
+-- Whether a non-buggy 'change-list' command is available for us to use
+local use_native_change_list
+
+-- Initialize the flags listed above.  Since this requires reading file-related
+-- properties, it should probably be run only after a file has been loaded.
+-- (The results will then be cached for future runs.)
+local function list_option_compat_checks()
+    -- These checks only need to be performed once
+    if supports_list_option_actions ~= nil then return end
+
+    msg.debug("Performing compatibility checks over list option actions...")
+
+    -- Check a property that was renamed ('audio-files' was chosen at random)
+    supports_list_option_actions = mp.get_property_native("audio-files") ~= nil
+    if supports_list_option_actions then
+        msg.debug("- List option actions are supported and will be used")
+        -- 'change-list' was fixed when introducing 'shared-script-properties'
+        use_native_change_list = mp.get_property_native("shared-script-properties") ~= nil
+        if use_native_change_list then
+            msg.debug("- 'change-list' should work correctly and will be called directly")
+        else
+            msg.debug("- 'change-list' may not work correctly and will be emulated instead")
+        end
+    else
+        msg.debug("- List option actions are not supported; properties will be set directly")
+    end
+end
+
+-- Our own (naive) implementation of the 'change-list' command
+local function change_list(option_name, action, value)
+    local local_option_name = string.format("file-local-options/%s", option_name)
+
+    -- If 'change-list' is available and working, let it do its magic
+    if use_native_change_list then
+        return mp.commandv("change-list", local_option_name, action, value)
+    end
+
+    -- Otherwise, fetch the list/table which we will need to modify ourselves
+    local list = mp.get_property_native(option_name)
+    if type(list) ~= "table" then
+        msg.error(string.format("'%s' is not a valid list option -- skipping", option_name))
+        return
+    end
+
+    -- Perform the required action on our local copy of the list
+    if action == "set" then
+        -- This is a special case which set_property() can handle by itself
+        -- correctly in any version
+        mp.set_property(local_option_name, value)
+        return
+    elseif action == "append" then
+        table.insert(list, value)
+    elseif action == "add" then
+        -- NOTE: we don't support >1 items
+        table.insert(list, value)
+    elseif action == "pre" then
+        -- NOTE: we don't support >1 items
+        table.insert(list, 1, value)
+    elseif action == "clr" then
+        list = {}
+    elseif action == "remove" then
+        msg.error("'remove' list action is currently not supported")
+        return
+    elseif action == "del" then
+        table.remove(list, value + 1)
+    elseif action == "toggle" then
+        msg.error("'toggle' list action is currently not supported")
+        return
+    else
+        msg.error(string.format("Unknown list option action '%s' -- skipping", action))
+        return
+    end
+
+    -- Put the final value back in place
+    mp.set_property_native(local_option_name, list)
+end
+
+-- Handle CLI exceptions to option handling, such as "--no-foo", "--foo-add",
+-- or "--foo" being a alias for "--foos-append".  These cannot be set as mere
+-- properties, so we have to deal with them ourselves.
+--
+-- Takes an option name as input, and returns three values: the name of the
+-- actual property that should be set/modified, a boolean indicating the
+-- presence of a "no" prefix, and a possible action suffix that should be
+-- passed as "operation" to the "change-list" command.
+--
+-- Based on m_config_mogrify_cli_opt() in options/m_config_frontend.c
+local function mogrify_option_name(name)
+    local negate, action = false, nil
+
+    -- Convert "--no-foo" to "--foo=no"
+    if name:startswith("no-") then
+        name = name:sub(4)
+        negate = true
+        -- No further processing is necessary/allowed
+        return name, negate, action
+    end
+
+    -- List option actions were introduced in 0.26; no need to do anything
+    -- else if they are not present.
+    if not supports_list_option_actions then
+        return name, negate, action
+    end
+
+    -- Resolve CLI aliases (such as "--foo" => "--foos-append").  If no alias
+    -- exists, the intact option name is returned.
+    local function resolve_option(name)
+        -- List of all CLI aliases (identified by OPT_CLI_ALIAS throughout the
+        -- mpv code).  This list also includes any deprecated aliases
+        -- (identified by OPT_REPLACED and OPT_REPLACED_MSG) ultimately
+        -- pointing to a CLI alias (indented below their target).  (Remember to
+        -- fully resolve the whole chain yourself; this function will not
+        -- recurse for you.)
+        local aliases = {
+            [ "audio-file"        ] = "audio-files-append",
+            [     "audiofile"     ] = "audio-files-append",
+            [ "external-file"     ] = "external-files-append",
+            [ "glsl-shader"       ] = "glsl-shaders-append",
+            -- 'opengl-shaders' was renamed to 'glsl-shaders' in 0.28;
+            -- the next entry is retained as-is for compatibility
+            [ "opengl-shader"     ] = "opengl-shaders-append",
+            [ "script"            ] = "scripts-append",
+            [     "lua"           ] = "scripts-append",
+            [ "sub-file"          ] = "sub-files-append",
+            [     "subfile"       ] = "sub-files-append",
+        }
+        for alias, target in pairs(aliases) do
+            if name == alias then
+                return target
+            end
+        end
+        return name
+    end
+    name = resolve_option(name)
+
+    -- Determine if an option suffix is a potential action
+    local function is_action(s)
+        -- List of all available actions
+        local actions = {
+            "set", "append", "add", "pre", "clr", "remove", "del", "toggle"
+        }
+        for _, action in ipairs(actions) do
+            if s == action then
+                return true
+            end
+        end
+        return false
+    end
+    -- Try splitting the option name over its last "-"
+    local _, _, base, suffix = name:find("^(.+)-(%w+)$")
+    -- If the suffix is an actual action, we have a winner!
+    if suffix ~= nil and is_action(suffix) then
+        name, action = base, suffix
+    end
+
+    return name, negate, action
+end
+
 -- Apply a profile locally to the current playing file.  Options set here
 -- will be restored to their previous value on the next file.
 local MAX_PROFILE_DEPTH = 20
@@ -502,11 +691,6 @@ local function apply_local_profile(profile, pseudo_props, depth)
                 msg.error(string.format("Unknown profile %q.", value))
             end
         else
-            -- Convert "no-foo" to "foo=no"
-            if option_name:startswith("no-") then
-                option_name = option_name:sub(4)
-                value = "no"
-            end
             -- Expand pseudo-properties
             for prop_name, prop_value in pairs(pseudo_props) do
                 local pattern = "${tree-profiles-" .. prop_name .. "}"
@@ -514,10 +698,20 @@ local function apply_local_profile(profile, pseudo_props, depth)
                 pattern = pattern:gsub("([^%w])", "%%%1")
                 value = value:gsub(pattern, prop_value)
             end
+            -- Deal with "--no-foo", "--foo-add" or "--foo" => "--foos-append"
+            local option_name, negate, action = mogrify_option_name(option_name)
+            if negate then
+                value = "no"
+            end
             -- FILE_LOCAL_FLAGS implies M_SETOPT_PRESERVE_CMDLINE
             if not mp.get_property_bool(string.format("option-info/%s/set-from-commandline", option_name)) then
-                msg.debug(string.format("Locally setting %s = %q", option_name, value))
-                mp.set_property(string.format("file-local-options/%s", option_name), value)
+                if action then
+                    msg.debug(string.format("Locally performing list action on %s: %s %q", option_name, action, value))
+                    change_list(option_name, action, value)
+                else
+                    msg.debug(string.format("Locally setting %s = %q", option_name, value))
+                    mp.set_property(string.format("file-local-options/%s", option_name), value)
+                end
             else
                 msg.verbose(string.format("Option %s was set on command-line -- leaving it as-is", option_name))
             end
@@ -588,6 +782,9 @@ local function on_load()
             return
         end
     end
+
+    -- Run compatibility checks for list options
+    list_option_compat_checks()
 
     local pseudo_props = get_pseudo_props(parent_profile, child_path)
     apply_profiles(parent_profile, child_path, pseudo_props)
