@@ -15,6 +15,9 @@ while (<>) {
 	chomp;
 
 	next unless /^--\[\[/ .. /^--\]\]/;
+	# Only allow one such section for now
+	last if /^--\]\]/;
+	# Skip the delimiters themselves
 	next if /^--/;
 
 	# Shift everything left by 4 spaces
