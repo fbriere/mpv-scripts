@@ -1,4 +1,4 @@
-# audio-file-keys.lua
+# [audio-file-keys.lua](https://github.com/fbriere/mpv-scripts/blob/master/scripts/audio-file-keys.lua)
 
 Automatically apply key bindings when playing audio files.
 

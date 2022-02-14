@@ -7,9 +7,11 @@ use strict;
 use warnings;
 
 
+my $ROOT_URL = 'https://github.com/fbriere/mpv-scripts/blob/master/scripts';
+
 my ($filename) = @ARGV;
 $filename =~ s!.*/!!;
-say "# $filename";
+say "# [$filename]($ROOT_URL/$filename)";
 
 while (<>) {
 	chomp;

@@ -1,4 +1,4 @@
-# tree-profiles.lua
+# [tree-profiles.lua](https://github.com/fbriere/mpv-scripts/blob/master/scripts/tree-profiles.lua)
 
 Automatically apply profiles to certain directories or files.
 

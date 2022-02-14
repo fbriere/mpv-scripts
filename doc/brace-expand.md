@@ -1,4 +1,4 @@
-# brace-expand.lua
+# [brace-expand.lua](https://github.com/fbriere/mpv-scripts/blob/master/scripts/brace-expand.lua)
 
 Perform Bash-style brace expansion on a string, returning a sequence of
 all resulting strings.  Braces can be nested, and sequence expressions are
