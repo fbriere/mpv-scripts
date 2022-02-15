@@ -387,7 +387,7 @@ local function get_pseudo_props(parent_profile, child_path)
 
     local child_path_dir, _ = utils.split_path(child_path)
     -- Cosmetic nitpicking: That trailing "/" just looks annoying to me
-    child_path_dir = child_path_dir:gsub("/+$", "")
+    child_path_dir = child_path_dir:gsub("(.)/+$", "%1")
     pseudo_props["directory"] = child_path_dir
 
     return pseudo_props
