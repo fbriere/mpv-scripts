@@ -9,6 +9,12 @@ useful to other people as well.  Feedback is most welcome!)
 
   Automatically apply profiles to certain directories or files.
 
+* **sub-fonts-dir-auto**
+([documentation](doc/sub-fonts-dir-auto.md))
+([source](scripts/sub-fonts-dir-auto.lua))
+
+  Automatically look for fonts directories to use with `sub-fonts-dir`.
+
 * **audio-file-keys**
 ([documentation](doc/audio-file-keys.md))
 ([source](scripts/audio-file-keys.lua))
